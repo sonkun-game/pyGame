@@ -9,3 +9,6 @@ class setup_data:
     title = "Hoang Son game"
     icon = 'viking-head.png'
     background = './img/ground.jpg'
+    
+    score = 0
+    enemy_is_running = True
