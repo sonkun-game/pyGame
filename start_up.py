@@ -8,6 +8,7 @@ from bullet import bullet
 
 # pygame setup
 pygame.init()
+pygame.font.init()
 screen = pygame.display.set_mode((st.screen_width, st.screen_height))
 clock = pygame.time.Clock()
 running = True

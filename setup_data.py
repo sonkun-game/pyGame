@@ -12,5 +12,4 @@ class setup_data:
     background = './img/ground.jpg'
     
     score_value = 0
-    font = pygame.font.Font('freesansbold.ttf', 32)
     enemy_is_running = True
