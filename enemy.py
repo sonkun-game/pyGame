@@ -14,6 +14,7 @@ class enemy:
     
     # link ảnh nhân vật
     image = ''
+    is_alive = True
     
     def __init__(self, position_x, position_y, speedX, speedY, image):
         self.position_x = position_x 

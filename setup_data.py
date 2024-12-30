@@ -1,3 +1,4 @@
+import pygame
 
 class setup_data: 
     # screen config
@@ -10,5 +11,6 @@ class setup_data:
     icon = 'viking-head.png'
     background = './img/ground.jpg'
     
-    score = 0
+    score_value = 0
+    font = pygame.font.Font('freesansbold.ttf', 32)
     enemy_is_running = True

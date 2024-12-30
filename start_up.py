@@ -1,7 +1,6 @@
 import pygame
 import random
 import math
-import time
 from setup_data import setup_data as st
 from player import player
 from enemy import enemy
@@ -17,6 +16,11 @@ running = True
 pygame.display.set_caption(st.title)
 icon = pygame.image.load(st.icon)
 pygame.display.set_icon(icon)
+
+# Score 
+textX = 10
+textY = 10
+font = pygame.font.Font('freesansbold.ttf', 32)
 
 # background
 background = pygame.image.load(st.background)
@@ -37,13 +41,32 @@ enemyX = 5
 enemyY = 5
 enemy_is_running = st.enemy_is_running
 
+listEnemyLabel = ['./img/cthulhu.png', './img/werewolf.png', './img/monster.png']
+listEnemy = []
+listEnemyX = []
+listEnemyY = []
+number_of_enemy = 3
+
+for i in range(number_of_enemy) :
+    if i <= len(listEnemyLabel) :
+        listEnemy.append(enemy(random.randint(0, st.screen_width), random.randint(50, 150), 5, 5, listEnemyLabel[i]))
+    else :
+        listEnemy.append(enemy(random.randint(0, st.screen_width), random.randint(50, 150), 5, 5, './img/cthulhu.png'))
+    listEnemyX.append(5)
+    listEnemyY.append(5)
+
+def showScore(x, y) :
+    score = font.render("Score : " + str(st.score_value), True, (255, 255, 255))
+    screen.blit(score, (x, y))
+
 def playerRunning(x, y) :
     image = warrior.playerImage()
     screen.blit(image, (x, y))
 
-def enemyRunning(x, y) :
-    image = cthulhu.enemyImage()
-    screen.blit(image, (x, y))
+def enemyRunning(x, y, i) :
+    if listEnemy[i].is_alive :
+        image = listEnemy[i].enemyImage()
+        screen.blit(image, (x, y))
 
 def fireBullet(x, y):
     fireball.bullet_state = 'fire'
@@ -51,8 +74,8 @@ def fireBullet(x, y):
     image= fireball.bulletImage()
     screen.blit(image, (x + 16, y + 10))
     
-def isGotHit(cthulhu: enemy, fireball: bullet):
-    distance = math.sqrt(math.pow(cthulhu.position_x - fireball.position_x , 2) + math.pow(cthulhu.position_y - fireball.position_y, 2))
+def isGotHit(monster: enemy, fireball: bullet):
+    distance = math.sqrt(math.pow(monster.position_x - fireball.position_x , 2) + math.pow(monster.position_y - fireball.position_y, 2))
     if distance <= 60 :
         return True
     else :
@@ -104,18 +127,31 @@ while running:
 
     # Enemy running
     if enemy_is_running :
-        cthulhu.position_x += enemyX
-        cthulhu.position_y += enemyY
 
-        if cthulhu.position_x <= 0 :
-            enemyX = cthulhu.speedX
-        elif cthulhu.position_x >= st.screen_width :
-            enemyX = cthulhu.negative_speedX
+        for i in range(number_of_enemy):
+            listEnemy[i].position_x += listEnemyX[i]
+            listEnemy[i].position_y += listEnemyY[i]
 
-        if cthulhu.position_y <= 0 :
-            enemyY = cthulhu.speedY
-        elif cthulhu.position_y >= st.screen_height :
-            enemyY = cthulhu.negative_speedY
+            if listEnemy[i].position_x <= 0 :
+                listEnemyX[i] = listEnemy[i].speedX
+            elif listEnemy[i].position_x >= st.screen_width :
+                listEnemyX[i] = listEnemy[i].negative_speedX
+
+            if listEnemy[i].position_y <= 0 :
+                listEnemyY[i] = listEnemy[i].speedY
+            elif listEnemy[i].position_y >= st.screen_height :
+                listEnemyY[i] = listEnemy[i].negative_speedY
+
+            # enemy got hit by fireball
+            is_got_hit = isGotHit(listEnemy[i], fireball)
+    
+            if is_got_hit and fireball.bullet_state is 'fire' :
+                fireball.position_y = 480
+                fireball.bullet_state = 'ready'
+                st.score_value += 1
+                listEnemy[i].is_alive = False
+
+            enemyRunning(listEnemy[i].position_x, listEnemy[i].position_y, i)
 
     # Fireball shooting
     if fireball.position_y <= 0:
@@ -125,26 +161,10 @@ while running:
     if fireball.bullet_state is 'fire' :
         fireBullet(bulletX, fireball.position_y)
         fireball.position_y -= bulletY
-        # Debug isGotHit
-        # print('bullet : ', fireball.position_x, ' -- ', fireball.position_y)
-        # print('enemy : ', cthulhu.position_x, ' -- ', cthulhu.position_y)
-        # distance = math.sqrt(math.pow(cthulhu.position_x - fireball.position_x , 2) + math.pow(cthulhu.position_y - fireball.position_y, 2))
-        # print('distance : ', distance)
-        
-    is_got_hit = isGotHit(cthulhu, fireball)
-    
-    if is_got_hit and enemy_is_running and fireball.bullet_state is 'fire' :
-        fireball.position_y = 480
-        fireball.bullet_state = 'ready'
-        st.score += 1
-        print('score : ',st.score)
-        cthulhu.position_x = random.randint(0, st.screen_width - 100)
-        cthulhu.position_y = random.randint(50, 150)
-        
         
     # render
     playerRunning(warrior.position_x, warrior.position_y)
-    enemyRunning(cthulhu.position_x, cthulhu.position_y)
+    showScore(textX, textY)
 
     # flip() the display to put your work on screen
     pygame.display.flip()
